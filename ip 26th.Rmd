@@ -1,0 +1,504 @@
+---
+title: "WEEK_12_IP_R"
+author: "Ian_Tirok"
+date: "August 26, 2021"
+output: pdf_document
+---
+```{r}
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#1. Defining the Question
+
+##a.Specifying the data analytic question
+``` Identify which individuals are most likely to click on ads.```
+##b) Defining the metric of success
+``` When we are able to identify the individuals likely to click on ads based on the information and data given.```
+##c) Understanding the context
+```A Kenyan entrepreneur has created an online cryptography course and would want to advertise it on her blog. She currently targets audiences originating from various countries. In the past, she ran ads to advertise a related course on the same blog and collected data in the process. She would now like to employ my services as a Data Science Consultant to help her identify which individuals are most likely to click on her ads.```
+##d) Recording the experimental design
+```The process will entail: 
+* Define the question, the metric for success, the context, experimental design taken.
+* Read and explore the given dataset.
+* Perform data cleanin - check for duplicates and missing data
+* Find and deal with outliers, anomalies, and missing data within the dataset.
+* Perform univariate and bivariate analysis recording my observations.```
+##e) Data Relevance
+```The data provided is very relevant and has a wide range of variables to consider in achieving our main objective of this project. 
+[Advertising dataset](http://bit.ly/IPAdvertisingData)```
+```{r}
+install.packages("data.table")
+library("data.table")
+```
+
+```{r}
+#Reading the dataset
+
+df = fread('http://bit.ly/IPAdvertisingData')
+
+
+```
+```{r}
+#Lets check the head of the dataframe
+head(df)
+
+```
+```{r}
+#Lets check the tail of the dataframe
+
+tail(df, n=6)
+```
+```{r}
+#Lets find out number of rows in our dataset 
+
+nrow(df)
+```
+```{r}
+#Lets find out number of collumns in our dataset 
+
+ncol(df)
+```
+```{r}
+#Lets find out the dimensions of our dataset 
+
+dim(df)
+```
+The shape of our dataframe is 1000 rows and 10 columns
+```{r}
+#Checking the structure of our dataset.
+
+str(df)
+```
+DATA CLEANING
+```{r}
+#Standardizing column names
+clean_names <- function(.df, unique = FALSE) {
+  n <- if (is.df.frame(.df)) colnames(.df) else .df
+  n <- gsub("%+", "_pct_", n)
+  n <- gsub("\\$+", "_dollars_", n)
+  n <- gsub("\\++", "_plus_", n)
+  n <- gsub("-+", "_minus_", n)
+  n <- gsub("\\*+", "_star_", n)
+  n <- gsub("#+", "_cnt_", n)
+  n <- gsub("&+", "_and_", n)
+  n <- gsub("@+", "_at_", n)
+  n <- gsub("[^a-zA-Z0-9_]+", "_", n)
+  n <- gsub("([A-Z][a-z])", "_\\1", n)
+  n <- tolower(trimws(n))
+  
+  n <- gsub("(^_+|_+$)", "", n)
+  
+  n <- gsub("_+", "_", n)
+  
+  if (unique) n <- make.unique(n, sep = "_")
+  
+  if (is.df.frame(.df)) {
+    colnames(.df) <- n
+    .df
+  } else {
+    n
+  }
+}
+```
+Dealing with missing data
+```{r}
+#Lets find out how many missing records are in our data
+
+colSums(is.na(df))
+```
+```{r}
+#Sum of missing records
+sum(is.na(df))
+```
+There seems to be no null records. we can procceed
+
+
+Lets deal with duplicate records
+```{r}
+#Checking for any duplicates 
+
+duplicated(df)
+```
+The above output does not give us clear information as to whether there are any duplicates. lets try to count them
+```{r}
+#Counting any duplicates 
+
+anyDuplicated(df)
+```
+There doesnt seem to be any duplicates
+
+
+Lets check for outliers
+```{r}
+#Checking the outliers in the Age Column.
+boxplot(df$Age)
+```
+```{r}
+#Checking the outliers in the Time spent on site Column.
+boxplot(df$'Daily Time Spent on Site')
+```
+```{r}
+#Checking the outliers in the Area income Column.
+
+boxplot(df$'Area Income')
+```
+```{r}
+#Checking the outliers in the Male Column.
+
+boxplot(df$'Male')
+```
+```{r}
+head(df)
+```
+Lets attempt to split the time stamp column to get more information
+
+
+```{r}
+install.packages("dplyr")
+
+```
+EXPLAROTARY DATA ANALYSIS
+
+Measures of dispersion
+
+```{r}
+dt.mean <- mean(df$'Daily Time Spent on Site')
+dt.mean
+dt.median <- median(df$'Daily Time Spent on Site')
+dt.median
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+dt.mode <- getmode(df$'Daily Time Spent on Site')
+dt.mode
+```
+Daily Time Spent on Site Measures of central tendency
+
+Mean - 65.002
+Median - 68.215
+Mode - 62.26
+```{r}
+#Checking the mean, median and mode of the age column
+age.mean <- mean(df$Age)
+age.mean
+age.median <- median(df$Age)
+age.median
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+age.mode <- getmode(df$Age)
+age.mode
+```
+Age Measures of central tendency
+
+Mean - 36.009
+Median - 35
+Mode - 31
+```{r}
+#Checking the mean, median and mode of the area income column
+ai.mean <- mean(df$'Area Income')
+ai.mean
+ai.median <- median(df$'Area Income')
+ai.median
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+ai.mode <- getmode(df$'Area Income')
+ai.mode
+```
+Area income Measures of central tendency
+
+Mean - 55000.00008
+Median - 57012.3
+Mode -61833.9
+```{r}
+#Checking the mean, median and mode of the daily internet usage column
+diu.mean <- mean(df$'Daily Internet Usage')
+diu.mean
+diu.median <- median(df$'Daily Internet Usage')
+diu.median
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+diu.mode <- getmode(df$'Daily Internet Usage')
+diu.mode
+```
+Daily Internet Usage Measures of central tendency
+
+Mean - 180.0001
+Median - 183.13
+Mode -167.22
+```{r}
+#Checking the mode of the country column
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+country.mode <- getmode(df$Country)
+country.mode
+```
+Czech Republic is the most frequent country.
+```{r}
+#Checking the mode of the city column
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+city.mode <- getmode(df$City)
+city.mode
+```
+Lisamouth is the most frequent city.
+```{r}
+#Checking the mode of the sex column
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+Male.mode <- getmode(df$Male)
+Male.mode
+```
+```{r}
+#Checking the mode of the Daily.Internet.Usage column
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+diu.mode <- getmode(df$'Daily Internet Usage')
+diu.mode
+```
+Majority of the site visitors had a daily internet usage of 167.22
+```{r}
+#Checking the mode of the Year column
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+yr.mode <- getmode(df$Timestamp
+                   )
+yr.mode
+```
+The site had most traffic on 27th March 2016 at 53 minutes past midnight
+
+
+
+Measures of dispersion
+Range
+```{r}
+#Finding the Range
+range(df$'Daily Time Spent on Site')
+range(df$'Age')
+range(df$'Area Income')
+range(df$'Daily Internet Usage')
+range(df$'Male')
+range(df$'Clicked on Ad')
+```
+The time spent on the site ranges from 32 minutes to 91 minutes
+
+The range of the age is 19 to 61 years old old
+
+The range of the area income is between 13,996 to 79,848 dollars
+
+The range of daily internet usage is betweem 104 minutes to 269 minutes
+
+The range of gender is 1  because there are only 2 possibilities
+
+The range of whether ad was clicked or not is 1. Because there are only 2 possibilites
+
+Standard Deviation
+```{r}
+#Finding the Standard Deviation
+
+sd(df$'Daily Time Spent on Site')
+sd(df$'Age')
+sd(df$'Area Income')
+sd(df$'Daily Internet Usage')
+sd(df$'Male')
+sd(df$'Clicked on Ad')
+```
+
+Standard deviation of Daily time spent on site is 15.85361
+Standard deviation of Age is 8.785562
+Standard deviation of Area income is 13414.63
+Standard deviation of Daily internet usage is 43.90234
+Standard deviation of Gender is 0.4998889 
+Standard deviation of Clicked on Ad is 0.5002502
+
+Calculating Variance
+```{r}
+#Finding the Standard Deviation
+
+var(df$'Daily Time Spent on Site')
+var(df$'Age')
+var(df$'Area Income')
+var(df$'Daily Internet Usage')
+var(df$'Male')
+var(df$'Clicked on Ad')
+```
+
+Variance of Daily time spent on site is 251.3371
+Variance of Age is 77.18611
+Variance of Area income is 179952406
+Variance of Daily internet usage is 1927.415
+Variance of Gender is 0.2498889 
+Variance of Clicked on Ad is 0.2502503
+
+
+Univariate analysis
+```{r}
+# Histogram for age
+hist(df$`Daily Time Spent on Site`)
+```
+Most people spend about 75 minutes on the website
+```{r}
+# Histogram for age
+hist(df$`Age`)
+
+
+```
+```{r}
+# Histogram for area income
+hist(df$`Area Income`)
+
+
+```
+
+```{r}
+# Histogram for area income
+hist(df$`Daily Internet Usage`)
+
+
+```
+```{r}
+# Histogram on gender distribution
+# 1 is male and 0 is female
+hist(df$`Male`)
+
+
+```
+
+```{r}
+# Histogram on gender distribution
+# 1 is clicked on ad and 0 represents people that did not click on the ad
+hist(df$`Clicked on Ad`)
+
+
+```
+BIVARIATE ANALYSIS
+**Income and Click on Ad distribution**
+```{r}
+install.packages("ggplot2")
+library("ggplot2")
+```
+
+```{r}
+library("ggplot2")
+ggplot(data = df, aes(x = Age, fill = 'Clicked on Ad'))+
+    geom_histogram(bins = 27, color = 'cyan') + 
+    labs(title = 'Age distribution with Ad clicks', x = 'Age', y = 'Frequency', fill = 'Clicked.on.Ad') +
+        scale_color_brewer(palette = 'Set2') 
+      
+```
+
+
+```{r}
+###Bivariate analysis
+#Covariance of age and click on ad
+age <- df$Age
+click <- df$'Clicked on Ad'
+gender <- df$Male
+cov(age, click)
+
+
+```
+The covariance of age to click is positive meaning they're positively related
+
+```{r}
+income <- df$'Area Income'
+click <- df$'Clicked on Ad'
+cov(income, click)
+
+
+```
+As income increases, the click on ad reduces - a negative covariance
+```{r}
+#Using correlation coefficient
+cor(age, click)
+
+
+```
+There is a medium positive correlation between age and click on ad
+
+```{r}
+cor(income, click)
+
+
+```
+There is a medium negative correlation between age and click on ad
+```{r}
+ 
+#
+# Creating a scatter plot
+plot(age, click, xlab="Age", ylab="click on ad")
+plot(income, click, xlab="Income", ylab="click on ad")
+plot(gender, click, xlab="gender", ylab="click on ad")
+# Both plots reveal positive correlation
+```
+```{r}
+#A scatter plot of Age vs Area Income.
+plot(df$Age, df$'Area Income', xlab="Age", ylab="Area Income")
+```
+There seems to be no correlation between the two variables.
+
+```{r}
+#A scatter plot of Age vs Daily Time Spent on Site.
+plot(df$'Daily Time Spent on Site', df$Age, xlab="Daily Time Spent on Site", ylab="Age")
+```
+The younger people seem to spend more time on the website than older people
+```{r}
+#A scatter plot of Age vs Daily.Internet.Usage.
+plot(df$'Daily Internet Usage', df$Age, xlab="Daily Internet Usage", ylab="Age")
+```
+The younger people seem to spend more time on the internet
+
+```{r}
+#A scatter plot of Area.Income vs Daily.Internet.Usage.
+plot(df$'Daily Internet Usage', df$'Area Income', xlab="Daily Internet Usage", ylab="Area.Income")
+```
+People with higher income seem to spend more time on the internet
+
+```{r}
+#A scatter plot of Daily.Internet.Usage vs Daily Time Spent on Site.
+plot(df$'Daily Internet Usage', df$'Daily Time Spent on Site', xlab="Daily Internet Usage", ylab="Daily.Time.Spent.on.Site")
+```
+There does not seem to be a clear correlation between the 2 variables
+
+```{r}
+tinytex::install_tinytex()
+```
+
+
+CONCLUSION
+
+1. Gender - Majority of the website visitors are female
+2. Age - Majority of the website visitors are between the ages 30 and 40 years
+3. City - Lisamouth is the city where most traffic originates from
+4. Country - Czech republic is the country where most traffic originates from
+5. Date - The website had most visitors on 27th March 2016 at 53 minutes past midnight
+6. Most people spend about 75 minutes on the website
+
+Recomendations
+
+1. Make more targeted ads for women
+2. Make more targeted ads for people between the ages of 30 - 40 years
+3. Expand target and try to capture markets other than Lisamouth city
+4. Expand targeted ads and try to capture other countres apart from Czech Republic
+5. Find out why the date 27th March 2016 had most traffic
+6. Find out whether users are comfortable speding upto 75 minutes on the website. And why they spend this much time
